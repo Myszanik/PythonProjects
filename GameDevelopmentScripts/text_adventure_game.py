@@ -1,4 +1,5 @@
 import tkinter as tk
+from tkinter import simpledialog, messagebox
 import tkinter.scrolledtext as scrolledtext
 import textwrap
 
@@ -25,9 +26,7 @@ class StoryNode:
         return [option_text for option_text, _ in self.options]
 
 
-def create_story():
-    # Define the nodes of your story
-    name = input("Welcome adventurer in our guild in Eldoria! What shall we call you? ")
+def create_story(name):
     start = StoryNode(f"Greetings {name}! If you are brave enough, we can interest you with some contracts "
                       "that can send you on some epic adventures:")
 
@@ -41,44 +40,69 @@ def create_story():
 
     scavenger_hunt_desc = textwrap.fill(
         "Seekers of powerful artifacts are required to gather three ancient relics to aid in the battle against Drakenroth. "
-        "Your journey will take you to the Whispering Caves, the Sunken Temple, and the Sky Tower, each guarded by formidable creatures. "
+        "Your journey will take you to the Whispering Caves, the Sunken Temple, and the Eldorian Church, each guarded by formidable creatures. "
         "This quest demands resourcefulness and determination to uncover the secrets and harness the power needed to save Eldoria.",
         width=70
     )
 
-    forest_adventure_desc = textwrap.fill(
-        "You find yourself at the edge of the dark and mysterious Haunted Forest. Do you dare venture deeper, or take a safer route around?",
-        width=70
-    )
+    # Scavenger Hunt Nodes
+    scavenger_hunt = StoryNode(scavenger_hunt_desc)
 
+    # Initial Church Node as part of the Scavenger Hunt
     church_adventure_desc = textwrap.fill(
-        "You arrive at the ancient and solemn Eldorian Church. Will you search it for clues, or seek the wisdom of the resident priest?",
+        "You arrive at the ancient and solemn Eldorian Church. One of the relics is rumored to be hidden here. "
+        "Will you search it for clues, or seek the wisdom of the resident priest?",
         width=70
     )
-
-    # Create StoryNode instances for adventures and their descriptions
-    the_dragons_bane = StoryNode(dragons_bane_desc)
-    the_scavenger_hunt = StoryNode(scavenger_hunt_desc)
-    forest_adventure = StoryNode(forest_adventure_desc)
     church_adventure = StoryNode(church_adventure_desc)
 
-    # Link nodes with choices
-    start.add_option("The Dragon's Bane", the_dragons_bane)
-    start.add_option("The Scavenger Hunt", the_scavenger_hunt)
+    # Expanded church nodes
+    search_altar = StoryNode("You approach the altar and find a series of strange symbols etched into the stone. "
+                             "Deciphering them reveals directions to a hidden statue within the church.")
 
-    the_dragons_bane.add_option("yes", forest_adventure)
-    the_dragons_bane.add_option("no", start)
+    statue_clue = StoryNode("You find the statue and discover a hidden compartment that mentions a secret basement beneath the church. "
+                            "However, the basement appears to be locked. You'll need to find a key to access it.")
 
-    the_scavenger_hunt.add_option("yes", church_adventure)
-    the_scavenger_hunt.add_option("no", start)
+    key_search = StoryNode("You need to find a key to unlock the hidden basement. You have three places to search:")
+    search_desk = StoryNode("You search the desk in the church’s study but find nothing useful.")
+    search_shelf = StoryNode("You check the shelves in the church’s library but come up empty.")
+    search_chest = StoryNode("You open an old chest in the corner and find a key that might unlock the hidden basement.")
 
-    forest_adventure.add_option("Venture deeper into the forest", StoryNode("You decide to delve deeper into the Haunted Forest. What's your next move?"))
-    forest_adventure.add_option("Go around the forest", StoryNode("You choose to take a safer path around the Haunted Forest. What's your next move?"))
+    # Nodes for finding the key
+    key_found = StoryNode("You use the key to unlock the hidden basement. As you prepare to enter, you notice the priest nearby.")
 
-    church_adventure.add_option("Search the church for clues", StoryNode("You decide to search the Eldorian Church for any hidden clues. What's your next move?"))
-    church_adventure.add_option("Ask the priest for history of the place", StoryNode("You opt to seek the wisdom of the priest regarding the history of Eldoria. What's your next move?"))
-    # NOW IT WORKS, YOU I JUST NEED TO KEEP ADDING MORE ADVENTURES TO IT SO IT HAS MORE STORY IN IT.
-    # ADD SOME FIGHTS, INTRODUCE HEALTH BAR, DIALOGS WITH NPCs
+    # Decision to go alone or with the priest
+    go_alone = StoryNode("You decide to venture into the basement alone. The air is thick with dust and the scent of ancient secrets. "
+                         "As you descend the stairs, you hear faint whispers echoing through the darkness. "
+                         "Your courage is tested as you step into the unknown...")
+
+    take_priest = StoryNode("You ask the priest to join you. He agrees, and together you enter the basement. "
+                            "With the priest's knowledge of the church's history, he helps you avoid traps and decipher ancient texts. "
+                            "The basement reveals a hidden chamber where you find the relic, a powerful artifact that will aid in your quest.")
+
+    # Connect nodes with options
+    start.add_option("The Dragon's Bane", dragons_bane_desc)
+    start.add_option("The Scavenger Hunt", scavenger_hunt)
+
+    scavenger_hunt.add_option("Go to the Eldorian Church", church_adventure)
+
+    church_adventure.add_option("Search the altar", search_altar)
+
+    search_altar.add_option("Investigate the statue", statue_clue)
+
+    statue_clue.add_option("Search for the key", key_search)
+
+    key_search.add_option("Search the desk", search_desk)
+    key_search.add_option("Check the shelves", search_shelf)
+    key_search.add_option("Open the chest", search_chest)
+
+    search_desk.add_option("Return to search for the key", key_search)
+    search_shelf.add_option("Return to search for the key", key_search)
+    search_chest.add_option("Use the key to unlock the hidden basement", key_found)
+
+    key_found.add_option("Go alone", go_alone)
+    key_found.add_option("Take the priest with you", take_priest)
+
     return start
 
 
@@ -88,23 +112,48 @@ class AdventureGameGUI:
         self.root.title("Text Adventure Game")
         self.current_node = None
 
-        # Create story and set starting node
-        self.starting_node = create_story()
-        self.current_node = self.starting_node
+        # Create text entry for name and initialize game interface
+        self.name_frame = tk.Frame(self.root)
+        self.game_frame = tk.Frame(self.root)
 
-        # Create text display area
-        self.text_display = scrolledtext.ScrolledText(self.root, width=80, height=15, wrap=tk.WORD)
-        self.text_display.pack(padx=10, pady=10)
-        self.update_text_display()
+        self.name_label = tk.Label(self.name_frame, text="Welcome adventurer in our guild in Eldoria! What shall we call you?")
+        self.name_label.pack(padx=10, pady=5)
 
-        # Create option buttons
+        self.name_entry = tk.Entry(self.name_frame)
+        self.name_entry.pack(padx=10, pady=5)
+
+        self.submit_button = tk.Button(self.name_frame, text="Start Adventure", command=self.submit_name)
+        self.submit_button.pack(padx=10, pady=5)
+
+        self.name_frame.pack(padx=10, pady=10)
+        
+        # Initialize other attributes
+        self.player_name = None
+        self.text_display = None
         self.option_buttons = []
-        self.create_option_buttons()
+        self.starting_node = None
+        self.initialize_game_interface()
+
+    def submit_name(self):
+        self.player_name = self.name_entry.get()
+        if self.player_name:
+            self.name_frame.pack_forget()
+            self.game_frame.pack(padx=10, pady=10)
+            self.starting_node = create_story(self.player_name)
+            self.current_node = self.starting_node
+            self.update_text_display()
+            self.create_option_buttons()
+        else:
+            messagebox.showerror("Error", "Name cannot be empty. Please enter a valid name.")
+
+    def initialize_game_interface(self):
+        self.text_display = scrolledtext.ScrolledText(self.game_frame, width=80, height=15, wrap=tk.WORD)
+        self.text_display.pack(padx=10, pady=10)
 
     def create_option_buttons(self):
         options = self.current_node.get_options()
         for idx, option_text in enumerate(options, 1):
-            button = tk.Button(self.root, text=f"Option {idx}: {option_text}", command=lambda idx=idx: self.choose_option(idx))
+            button = tk.Button(self.game_frame, text=f"Option {idx}: {option_text}", command=lambda idx=idx: self.choose_option(idx))
             button.pack(pady=5)
             self.option_buttons.append(button)
 
@@ -116,6 +165,8 @@ class AdventureGameGUI:
     def choose_option(self, idx):
         options = self.current_node.get_options()
         next_node = self.current_node.get_next_node(str(idx))
+        if callable(next_node):
+            next_node = next_node()
         if next_node:
             self.current_node = next_node
             self.update_text_display()
@@ -130,15 +181,17 @@ class AdventureGameGUI:
 
         else:
             # Final node reached or confirmation node
-            confirmation = tk.messagebox.askquestion("Adventure Confirmation",
+            confirmation = messagebox.askquestion("Adventure Confirmation",
                                                      f"Are you sure you want to choose '{options[idx - 1]}'?")
             if confirmation == 'yes':
-                tk.messagebox.showinfo("Adventure Confirmed", "Your adventure begins!")
+                messagebox.showinfo("Adventure Confirmed", "Your adventure begins!")
             else:
                 # Restart game
                 self.current_node = self.starting_node
                 self.update_text_display()
                 self.create_option_buttons()
+
+
 
 
 if __name__ == "__main__":
