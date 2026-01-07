@@ -27,12 +27,12 @@ A collection of small Python scripts and mini-projects for learning and practice
    git clone https://github.com/Myszanik/PythonProjects.git
 2. **Navigate to the Project Directory**:
    ```bash
-   cd ExpanseTrackerScripts
+   cd ExpenseTrackerScripts
 3. **Install Dependencies (optional)**:
    ```bash
-   pip install -r requirements.txt
+   pip install pygame
 4. **Run the Application**:
    ```bash
-   python spli_bill_console.py
+   python split_bill_console.py
 
 Step 3 is optional, only needed for scripts that require extra libraries, for example pygame.
