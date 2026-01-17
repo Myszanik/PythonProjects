@@ -20,19 +20,20 @@ A collection of small Python scripts and mini-projects for learning and practice
 - `tkinter`, usually comes pre-installed with Python
 - `pygame`, only needed for scripts that use it
 
-## How to Run
+## Setup (Windows, PowerShell)
 
 1. **Clone this repository**:
-   ```bash
+   ```powershell
    git clone https://github.com/Myszanik/PythonProjects.git
 2. **Navigate to the Project Directory**:
-   ```bash
-   cd ExpenseTrackerScripts
+   ```powershell
+   cd PythonProjects
 3. **Install Dependencies (optional)**:
-   ```bash
-   pip install pygame
-4. **Run the Application**:
-   ```bash
-   python split_bill_console.py
+   ```powershell
+   python -m pip install pygame
+4. **Run a script**:  
+   Example (console bill splitter):
+   ```powershell
+   python .\ExpenseTrackerScripts\split_bill_console.py
 
 Step 3 is optional, only needed for scripts that require extra libraries, for example pygame.
